@@ -3,17 +3,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import style from './Checkout.module.css';
 import screen from './../../assets/logofilm/screen-thumb.png'
 import logo from './../../assets/logofilm/Oxfilm.png'
-import { datVeAction, layChiTietPhongVeAction } from '../../redux/actions/QuanLyDatVeActions';
+import { datGheAction, datVeAction, layChiTietPhongVeAction } from '../../redux/actions/QuanLyDatVeActions';
 import seat from './../../assets/logofilm/seat.png'
 import './Checkout.css'
-import { CloseOutlined, UserOutlined } from '@ant-design/icons'
-import { CHANGE_TAB_ACTIVE, CHUYEN_TAB, DAT_VE } from '../../redux/actions/types/QuanLyDatVeType';
+import { CloseOutlined, UserOutlined, SmileOutlined } from '@ant-design/icons'
+import { CHANGE_TAB_ACTIVE, CHUYEN_TAB, DAT_GHE, DAT_VE } from '../../redux/actions/types/QuanLyDatVeType';
 import _ from 'lodash';
 import { ThongTinDatVe } from '../../_core/models/ThongTinDatVe';
 import { Tabs } from 'antd';
 import { NavLink } from 'react-router-dom';
 import { layThongTinNguoiDungAction } from '../../redux/actions/QuanLyNguoiDungAction';
 import moment from 'moment';
+import { connection } from '../../index';
+// import { history } from '../../App';
+import { TOKEN, USER_LOGIN, USER_SIGNUP } from '../../util/settings/config';
+import { useHistory } from 'react-router-dom';
 
 
 
@@ -22,9 +26,10 @@ import moment from 'moment';
 
 function Checkout(props) {
 
+
   const { userLogin } = useSelector(state => state.QuanLyNguoiDungReducer);
 
-  const { chiTietPhongVe, danhSachGheDangDat } = useSelector(state => state.QuanLyDatVeReducer);
+  const { chiTietPhongVe, danhSachGheDangDat,danhSachGheKhachDat } = useSelector(state => state.QuanLyDatVeReducer);
 
   const dispatch = useDispatch();
 
@@ -34,8 +39,58 @@ function Checkout(props) {
     //Goi ham tao ra 1 async function
     const action = layChiTietPhongVeAction(props.match.params.id);
     //Dispatch function nay di
-    dispatch(action)
+    dispatch(action);
+
+
+    //Có 1 client nào thực hiện việc đặt vé thành công mình sẽ load lại danh sách phòng vé của lịch chiếu đó
+    connection.on('datVeThanhCong',() => {
+      dispatch(action);
+    })
+
+    //Vừa vào trang load tất cả ghế của người khác đang đặt
+    connection.invoke('loadDanhSachGhe',props.match.params.id)
+
+    //Load danh sách ghế đang đặt từ server về -video 59 realtime (lắng nghe sự kiện từ serve trả về)
+    connection.on("loadDanhSachGheDaDat", (dsGheKhachDat)=> {
+      console.log('loadDanhSachGheDaDat',dsGheKhachDat); 
+
+      //B1: Loại mình ra khỏi danh sách - video60
+      dsGheKhachDat = dsGheKhachDat.filter(item => item.taiKhoan !== userLogin.taiKhoan);
+      //B2: Gộp danh sách ghế khách đawtj ở tất cả user thành 1 mảng chung
+
+      let arrGheKhachDat = dsGheKhachDat.reduce((result,item,index)=>{
+        let arrGhe = JSON.parse(item.danhSachGhe);
+
+        return [...result,...arrGhe]
+      },[]);
+
+      //Đôi lúc vì yếu tố mạng nên khách sẽ đặt trùng với nhau => trùng ghế vói nhau => Backend sẽ xử lý
+      //Frontend cũng xử lý được bằng cách loại bỏ những phần tử trùng nhau trong mảng => sử dụng lodash uniqBy
+      // Sau đó đưa dữ liệu ghế khách đặt cập nhật redux
+      arrGheKhachDat = _.uniqBy(arrGheKhachDat,'maGhe');
+
+      //Đưa dữ liệu khách đặt về redux
+      dispatch({
+        type: DAT_GHE,
+        arrGheKhachDat:arrGheKhachDat
+      })
+      console.log(arrGheKhachDat)
+    })
+
+    //Cài đặt sự kiện khi reload trang (khi ghế ko đặt sẽ bị mất)
+    window.addEventListener("beforeunload",clearGhe);
+
+    return () => {
+      clearGhe();
+      window.removeEventListener('beforeunload',clearGhe)
+    }
+        
+
   }, [])
+
+  const clearGhe = function(event) {
+    connection.invoke('huyDat',userLogin.taiKhoan,props.match.params.id)
+  }
 
   const { thongTinPhim, danhSachGhe } = chiTietPhongVe;
 
@@ -58,18 +113,25 @@ function Checkout(props) {
         classGheDaDuocDat = 'gheDaDuocDat';
       }
 
+      //Kiểm tra từng ghế render xem có phải ghế khách đặt hay không (video58)
+      let classGheKhachDat = '';
+      let indexGheKD = danhSachGheKhachDat.findIndex(gheKD => gheKD.maGhe === ghe.maGhe);
+      if(indexGheKD !== -1) {
+        classGheKhachDat = 'gheKhachDat';
+      }
 
 
       return <Fragment key={index}>
         <button onClick={() => {
-          dispatch({
-            type: DAT_VE,
-            gheDuocChon: ghe
-          })
-        }} disabled={ghe.daDat} className={`ghe ${classGheVip} ${classGheDaDat} ${classGheDangDat} ${classGheDaDuocDat}`}
+
+          const action = datGheAction(ghe,props.match.params.id);
+          dispatch(action);
+
+
+        }} disabled={ghe.daDat || classGheKhachDat !=='' } className={`ghe ${classGheVip} ${classGheDaDat} ${classGheDangDat} ${classGheDaDuocDat} ${classGheKhachDat}`}
           key={index}>
           <img src={seat} alt="" />
-          {ghe.daDat ? classGheDaDuocDat != '' ? <UserOutlined /> : <CloseOutlined /> : ghe.stt}
+          {ghe.daDat ? classGheDaDuocDat !== '' ? <UserOutlined /> : <CloseOutlined /> : classGheKhachDat !=='' ? <SmileOutlined /> : ghe.stt}
 
         </button>
 
@@ -97,6 +159,8 @@ function Checkout(props) {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghế vip</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghế đã đặt</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghế mình đặt</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghế khách đang đặt</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -106,6 +170,8 @@ function Checkout(props) {
                   <td className='text-center'><button className="gheVip"><img style={{ width: '30px' }} src={seat} alt="" /></button></td>
                   <td className='text-center'><button className="gheDaDat"><img style={{ width: '30px' }} src={seat} alt="" /></button></td>
                   <td className='text-center'><button className="gheDaDuocDat"><img style={{ width: '30px' }} src={seat} alt="" /></button></td>
+                  <td className='text-center'><button className="gheKhachDat"><img style={{ width: '30px' }} src={seat} alt="" /></button></td>
+
                 </tr>
               </tbody>
             </table>
@@ -204,13 +270,50 @@ function callback(key) {
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default function CheckoutTab(props) {
+  const history = useHistory();
 
   const { tabActive } = useSelector(state => state.QuanLyDatVeReducer)
   const dispatch = useDispatch();
-  console.log({ tabActive })
+  console.log({ tabActive });
+
+  const {userLogin} = useSelector(state=>state.QuanLyNguoiDungReducer)
+
+  const operations = <Fragment>
+    <div className='flex px-2 text-justify'>
+    <div style={{width:30,height:30, display:'flex', justifyContent:'center', alignItems:'center', borderRadius:'50%', color:'white'}} className="ml-5 rounded-full, bg-green-400">
+        {userLogin.taiKhoan.substr(0,1)}
+      </div>
+    <div style={{justifyContent:'center', alignItems:'center', margin:'5px'}}>
+    {!_.isEmpty(userLogin) ? <button onClick={()=>{
+      history.push('/profile')
+      // window.location.reload()
+    }} className='text-white'>
+      Hello ! {userLogin.taiKhoan}</button> : ''}
+    </div>
+    <div>
+      <button onClick={()=>{
+        localStorage.removeItem(USER_LOGIN);
+        localStorage.removeItem(USER_SIGNUP);
+        localStorage.removeItem(TOKEN);
+        history.push('/home');
+        window.location.reload();
+      }} style={{backgroundColor:'#7d78ff', color:'#ffffff', borderRadius:'25px',justifyContent:'center', alignItems:'center',height:'30px',width:'100px'}}>Đăng Xuất</button>
+    </div>
+    </div>
+  </Fragment>;
+
+
   return <div className="p-5" style={{ backgroundColor: '#001232' }}>
-    <NavLink to="/"><img style={{ width: '180px', paddingTop: '10px' }} src={logo} alt="123" /></NavLink>
-    <Tabs defaultActiveKey="1" activeKey={tabActive} onChange={(key) => {
+    <div className='grid grid-cols-12'>
+      <div className='col-span-10'>
+      <NavLink to="/"><img style={{ width: '180px', paddingTop: '10px' }} src={logo} alt="123" /></NavLink>
+      </div>
+    <div className='col-span-2 mt-6'>
+    <NavLink to="/" style={{height:'40px'}} className={`${style['back-button']}`}>Quay lại trang chủ</NavLink>
+    </div>
+    
+    </div>
+    <Tabs tabBarExtraContent={operations} defaultActiveKey="1" activeKey={tabActive} onChange={(key) => {
       console.log('obeject', key)
       dispatch({
         type: CHANGE_TAB_ACTIVE,
@@ -296,7 +399,7 @@ function KetQuaDatVe(props) {
                   <h6 className='text-white'>Tên KH: {thongTinNguoiDung.hoTen}</h6>
                   <h6 className='text-white'>Tài khoản: {thongTinNguoiDung.taiKhoan}</h6>
                   <h6 className='text-white'>Email: {thongTinNguoiDung.email}</h6>
-                  <h6 className='text-white'>Số ĐT: 0123456789{thongTinNguoiDung.soDT}</h6>
+                  <h6 className='text-white'>Số ĐT: {thongTinNguoiDung.soDT}</h6>
                 </li>
               </ul>
               <ul className="side-shape">

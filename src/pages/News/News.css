@@ -1,0 +1,8 @@
+.news {
+    background-image: url(./banner02.jpg);
+}
+
+.newtag {
+    background-image: -webkit-linear-gradient(0deg, #0f5ae0 0%, #7400ba 100%);
+    /* opacity: 0.9; */
+}

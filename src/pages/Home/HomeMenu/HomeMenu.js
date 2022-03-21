@@ -26,9 +26,9 @@ export default function HomeMenu(props) {
                         return <TabPane key={index} tab={
                             <div style={{ width: '300px', display: 'flex' }}>
                                 <img src="https://hkd.com.vn/ckfinder/userfiles/images/DU%20AN/26-2.png" width="50" alt="" />
-                                <div className='text-left ml-2'>
+                                <div className='text-left ml-2 text-white'>
                                     {cumRap.tenCumRap} <br />
-                                    <a className='text-red-400'>Chi tiết</a>
+                                    <a className='text-emerald-400'>Chi tiết</a>
                                 </div>
                             </div>
                         }>
@@ -41,12 +41,12 @@ export default function HomeMenu(props) {
                                                 currentTarget.src = "https://picsum.photos/75/75";
                                             }} />
                                             <div className="ml-2">
-                                                <h1 className="text-1xl text-green-700">{phim.tenPhim}</h1>
-                                                <p>{cumRap.diaChi}</p>
+                                                <h1 className="text-2xl text-emerald-400">{phim.tenPhim}</h1>
+                                                <p className='text-gray-400'>{cumRap.diaChi}</p>
 
                                                 <div className="grid grid-cols-6 gap-6">
                                                     {phim.lstLichChieuTheoPhim?.slice(0, 12).map((lichChieu, idex) => {
-                                                        return <NavLink className="text-1xl text-orange-500" to="/" key={index}>
+                                                        return <NavLink className="text-1xl text-white" to={`/checkout/${lichChieu.maLichChieu}`} key={index}>
                                                             {moment(lichChieu.ngayChieuGioChieu).format('hh:mm A')}
                                                         </NavLink>
                                                     })}

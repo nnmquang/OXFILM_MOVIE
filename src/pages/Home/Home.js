@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import HomeMenu from './HomeMenu/HomeMenu'
+import bg from '../../assets/logofilm/inner-bg01.jpg';
+import './Home.css'
 //Kết nối redux
 import { useSelector, useDispatch } from 'react-redux'
 import Film from '../../components/Film/Film';
@@ -30,7 +32,8 @@ export default function Home(props) {
 
 
   return (
-    <div>
+    
+    <div className='bg_inn'>
       <HomeCarousel/>
       <section className="text-gray-600 body-font">
         <div className="container px-5 py-24 mx-auto">
@@ -44,7 +47,6 @@ export default function Home(props) {
       <div className="mx-36">
         <HomeMenu heThongRapChieu={heThongRapChieu} />
       </div>
-
     </div>
   )
 }

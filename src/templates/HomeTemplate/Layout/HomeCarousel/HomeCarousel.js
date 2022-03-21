@@ -1,9 +1,10 @@
-import React,{useEffect} from 'react'
+import React,{useEffect, useState} from 'react'
 import { Carousel } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios'
 import { getCarouselAction } from '../../../../redux/actions/CarouselActions';
 import './HomeCarousel.css';
+import { CSSTransition } from 'react-transition-group';
 
 
 const contentStyle = {
@@ -20,8 +21,14 @@ const contentStyle = {
 
 export default function HomeCarousel(props) {
 
-    const { arrImg } = useSelector(state => state.CarouselReducer)
+    const { arrFilm } = useSelector(state => state.QuanLyPhimReducer);
+    console.log({arrFilm})
+
+    const { arrImg } = useSelector(state => state.CarouselReducer);
+    const  [show, setShow] = useState(false)
     console.log('arrImg', arrImg)
+    const [trailer, setTrailer] = useState("");
+
 
     const dispatch = useDispatch();
 
@@ -62,19 +69,49 @@ export default function HomeCarousel(props) {
       },[])
 
     const renderImg = () => {
-        return arrImg.map((item,index) => {
-            return <div key={index}>
-                <div style={{...contentStyle, backgroundImage:`url(${item.hinhAnh})`}}>
+        // return arrImg.map((item,index) => {
+        //     return <div key={index}>
+        //         <div style={{...contentStyle, backgroundImage:`url(${item.hinhAnh})`}} >
+        //             <img src={item.hinhAnh} className="w-full opacity-0" alt="item.hinhAnh" />
+        //         </div>
+        //     </div>
+        // })
+
+        return arrFilm.map((item,index) => {
+            return <div key={index} onClick={()=>{setTrailer(item.trailer);}}>
+                <div style={{...contentStyle, backgroundImage:`url(${item.hinhAnh})`}} >
                     <img src={item.hinhAnh} className="w-full opacity-0" alt="item.hinhAnh" />
                 </div>
+                <button onClick={() => setShow(true)} className="play-btn-carousel">
+            <img src="./images/play-video.png" alt="playVideo"/>
+        </button>
+
             </div>
         })
     }
 
     return (
-        <Carousel effect='fade'style={{width:'100%',padding:0,margin:0}}>
+       <div className='relative'>
+            <Carousel autoplay effect='fade'style={{width:'100%',padding:0,margin:0,maxHeight:'500px'}}>
             {renderImg()}
-
         </Carousel>
+        {/* <button onClick={() => setShow(true)} className="play-btn-carousel">
+            <img src="./images/play-video.png" alt="playVideo"/>
+        </button> */}
+        <CSSTransition in={show} unmountOnExit timeout={{ enter: 0, exit: 300 }}>
+        <div className="modal" onClick={() => setShow(false)}>
+          <iframe
+            title="title1"
+            allowfullscreen="true"
+            width="994px"
+            height="500px"
+            src={trailer}
+            frameborder="0"
+          ></iframe>
+        </div>
+      </CSSTransition>
+       </div>
+        
     )
 }
+

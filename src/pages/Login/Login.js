@@ -30,7 +30,7 @@ export default function Login(props) {
     <form onSubmit={formik.handleSubmit} className="lg:w-1/2 xl:max-w-screen-sm">
     <div className="py-12 bg-indigo-100 lg:bg-white flex justify-center lg:justify-start lg:px-12">
         <div className="cursor-pointer flex items-center">
-        <img style={{width:'180px'}} src={logo} alt="123"/>
+        <NavLink to="/"><img style={{width:'180px'}} src={logo} alt="123"/></NavLink>
             {/* <div>
                 <svg className="w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 225 225" style={{ enableBackground: 'new 0 0 225 225' }} xmlSpace="preserve">
                     <style type="text/css" dangerouslySetInnerHTML={{ __html: "\n                                    .st0{fill:none;stroke:currentColor;stroke-width:20;stroke-linecap:round;stroke-miterlimit:3;}\n                                " }} />
@@ -76,7 +76,7 @@ xl:text-bold">Đăng nhập</h2>
                 </div>
             </div>
             <div className="mt-12 text-sm font-display font-semibold text-gray-700 text-center">
-                Bạn chưa có tài khoản ? <NavLink to="/register" className="cursor-pointer text-indigo-600 hover:text-indigo-800">Đăng nhập</NavLink>
+                Bạn chưa có tài khoản ? <NavLink to="/register" className="cursor-pointer text-indigo-600 hover:text-indigo-800">Đăng Ký</NavLink>
             </div>
         </div>
     </div>

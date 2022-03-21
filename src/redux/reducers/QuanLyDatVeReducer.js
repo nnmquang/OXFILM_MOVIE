@@ -1,4 +1,4 @@
-import { CHANGE_TAB_ACTIVE, CHUYEN_TAB, DAT_VE, DAT_VE_HOAN_TAT, SET_CHI_TIET_PHONG_VE } from "../actions/types/QuanLyDatVeType"
+import { CHANGE_TAB_ACTIVE, CHUYEN_TAB, DAT_GHE, DAT_VE, DAT_VE_HOAN_TAT, SET_CHI_TIET_PHONG_VE } from "../actions/types/QuanLyDatVeType"
 import { ThongTinLichChieu } from '../../_core/models/ThongTinPhongVe'
 
 const initialState = {
@@ -6,6 +6,7 @@ const initialState = {
     danhSachGheDangDat: [
       // {maGhe: 47561, tenGhe: '01', maRap: 452, loaiGhe: 'Thuong', stt: '01'}
     ],
+    danhSachGheKhachDat: [], //[{maGhe:63721},{maGhe:63722}]
     tabActive:'1'
 }
 
@@ -46,6 +47,11 @@ export const QuanLyDatVeReducer = (state = initialState, action) => {
 
     case CHANGE_TAB_ACTIVE : {
       state.tabActive = action.number;
+      return {...state};
+    }
+
+    case DAT_GHE : {
+      state.danhSachGheKhachDat = action.arrGheKhachDat;
       return {...state};
     }
 
