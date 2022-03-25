@@ -18,10 +18,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { capNhatPhimUploadAction, layThongTinPhimAction, themPhimUploadHinhAction } from '../../../../redux/actions/QuanLyPhimActions';
 import { GROUPID } from '../../../../util/settings/config';
 import { Editor } from '@tinymce/tinymce-react';
+import ReactHtmlParser from 'react-html-parser';
+
+
 
 const { TextArea } = Input;
 
 const Edit = (props) => {
+    
     const [componentSize, setComponentSize] = useState('default');
     const [imgSrc, setImgSrc] = useState('');
     const { thongTinPhim } = useSelector(state => state.QuanLyPhimReducer);
@@ -140,6 +144,8 @@ const Edit = (props) => {
         return div.innerText;
     };
 
+    const jsxMoTa = ReactHtmlParser(formik.values.moTa);
+
     return (
         <Form
             onSubmitCapture={formik.handleSubmit}
@@ -180,45 +186,46 @@ const Edit = (props) => {
                     // initialValue={values.description}
                     value={formik.values.moTa}
                     init={{
-                        // selector: 'textarea',
-                        // forced_root_block : "",
-                        // block_formats: 'Paragraph=p; Header 1=h1; Header 2=h2; Header 3=h3',
-                        // height: 300,
-                        // menubar: false,
-                        // plugins: [
-                        //     'advlist autolink lists link image charmap print preview anchor',
-                        //     'searchreplace visualblocks code fullscreen',
-                        //     'insertdatetime media table paste code help wordcount'
-                        // ],
-                        // toolbar: 'undo redo | formatselect | ' +
-                        //     'bold italic backcolor | alignleft aligncenter ' +
-                        //     'alignright alignjustify | bullist numlist outdent indent | ' +
-                        //     'removeformat | help',
-                        // content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-                        selector: "textarea",
-                        language: 'vi_VN',
-                        //inline: true, //for contenteditable selector
-                        forced_root_block: "", //!important
-                        force_br_newlines: true, //!important
-                        force_p_newlines: false, //!important
-                        valid_elements: "br", //!important
-                        paste_as_text: true, //!important
-                        external_plugins: {
-                            twExoticMarkdownEditor: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twExoticMarkdownEditor.js", //!important
-                            bubbleBar: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/tinymceBubbleBar.js", //!important
-                            twPreCodeManager: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twPreCodeManager.js",
-                            modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js",
-                        },
-                        twExoticMarkdownEditorSettings: {
-                            addClass: false, //default is true (add .twExoticMarkdownEditor class to editor body)
-                            removeClasses: "a b c", // remove class(es) when editor loads - smoothly reveal editor only after text has been prepared
-                            skipClass: "", // do not process this particular editor content, skip it!
-                            addAttr: false, //default is true (add markdown="1" to editor body) good for parsing mixed content in mark/parsedownExtra
-                        },
-                        plugins: "paste contextmenu save searchreplace", //!important
-                        toolbar: "modxMagicHoverLink twPreCodeManager boldMD italicMD linkMD imageMD blockquoteMD codeMD numlistMD bullistMD tableMD undo redo searchreplace bubbleBarOptionsButton", //!important
+                        selector: 'textarea',
+                        forced_root_block : "",
+                        block_formats: 'Paragraph=p; Header 1=h1; Header 2=h2; Header 3=h3',
+                        height: 300,
                         menubar: false,
-                        contextmenu: "modxMagicHoverLink twPreCodeManager boldMD italicMD linkMD imageMD blockquoteMD codeMD numlistMD bullistMD tableMD undo redo searchreplace template" //!important
+                        plugins: [
+                            'advlist autolink lists link image charmap print preview anchor',
+                            'searchreplace visualblocks code fullscreen',
+                            'insertdatetime media table paste code help wordcount'
+                        ],
+                        toolbar: 'undo redo | formatselect | ' +
+                            'bold italic backcolor | alignleft aligncenter ' +
+                            'alignright alignjustify | bullist numlist outdent indent | ' +
+                            'removeformat | help',
+                        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                        
+                        // selector: "textarea",
+                        // language: 'vi_VN',
+                        // //inline: true, //for contenteditable selector
+                        // forced_root_block: "", //!important
+                        // force_br_newlines: true, //!important
+                        // force_p_newlines: false, //!important
+                        // valid_elements: "br", //!important
+                        // paste_as_text: true, //!important
+                        // external_plugins: {
+                        //     twExoticMarkdownEditor: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twExoticMarkdownEditor.js", //!important
+                        //     bubbleBar: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/tinymceBubbleBar.js", //!important
+                        //     twPreCodeManager: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twPreCodeManager.js",
+                        //     modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js",
+                        // },
+                        // twExoticMarkdownEditorSettings: {
+                        //     addClass: false, //default is true (add .twExoticMarkdownEditor class to editor body)
+                        //     removeClasses: "a b c", // remove class(es) when editor loads - smoothly reveal editor only after text has been prepared
+                        //     skipClass: "", // do not process this particular editor content, skip it!
+                        //     addAttr: false, //default is true (add markdown="1" to editor body) good for parsing mixed content in mark/parsedownExtra
+                        // },
+                        // plugins: "paste contextmenu save searchreplace", //!important
+                        // toolbar: "modxMagicHoverLink twPreCodeManager boldMD italicMD linkMD imageMD blockquoteMD codeMD numlistMD bullistMD tableMD undo redo searchreplace bubbleBarOptionsButton", //!important
+                        // menubar: false,
+                        // contextmenu: "modxMagicHoverLink twPreCodeManager boldMD italicMD linkMD imageMD blockquoteMD codeMD numlistMD bullistMD tableMD undo redo searchreplace template" //!important
                     }}
                     onEditorChange={handleEditorChange}
 

@@ -23,7 +23,8 @@ import AccountTemplates from './templates/AccountTemplates/AccountTemplates';
 import Accounts from './pages/Accounts/Accounts';
 import AddNewAcc from './pages/Accounts/AddNewAcc/AddNewAcc';
 import EditAcc from './pages/Accounts/EditAcc/EditAcc';
-
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
 export const history = createBrowserHistory();
 
 function App() {
